@@ -1,7 +1,8 @@
 import { DataRow } from './Map';
+import './CountryTable.css';
 
 interface CountryTableProps {
-  countries: string[];
+  countries: { countryName: string; year: number }[];
   data: DataRow[];
 }
 
@@ -14,55 +15,44 @@ export const CountryTable: React.FC<CountryTableProps> = ({
       <thead>
         <tr>
           <th>Country</th>
-          <th>Life ladder</th>
+          <th>Continent</th>
+          <th>Year</th>
+          <th>
+            Happiness<br></br>(0-10)
+          </th>
           <th>GDP</th>
           <th>Social support</th>
-          <th>Healthy life expectancy at birth</th>
-          <th>Freedom to make life choices</th>
+          <th>Expectancy of years with healthy life</th>
+          <th>Freedom of choices</th>
           <th>Generosity</th>
-          <th>Perceptions of corruption</th>
+          <th>Corruption</th>
           <th>Positive affect</th>
           <th>Negative affect</th>
         </tr>
       </thead>
       <tbody>
-        {countries.map((country) => (
-          <tr key={country}>
-            <td>{country}</td>
-            <td>{data.find((d) => d.countryName === country)?.lifeLadder}</td>
-            <td>
-              {data.find((d) => d.countryName === country)?.logGdpPerCapita}
-            </td>
-            <td>
-              {data.find((d) => d.countryName === country)?.socialSupport}
-            </td>
-            <td>
-              {
-                data.find((d) => d.countryName === country)
-                  ?.healthyLifeExpectancyAtBirth
-              }
-            </td>
-            <td>
-              {
-                data.find((d) => d.countryName === country)
-                  ?.freedomToMakeLifeChoices
-              }
-            </td>
-            <td>{data.find((d) => d.countryName === country)?.generosity}</td>
-            <td>
-              {
-                data.find((d) => d.countryName === country)
-                  ?.perceptionsOfCorruption
-              }
-            </td>
-            <td>
-              {data.find((d) => d.countryName === country)?.positiveAffect}
-            </td>
-            <td>
-              {data.find((d) => d.countryName === country)?.negativeAffect}
-            </td>
-          </tr>
-        ))}
+        {data
+          .filter((d) =>
+            countries.some(
+              (c) => c.countryName === d.countryName && c.year === d.year
+            )
+          )
+          .map((d) => (
+            <tr key={d.countryName}>
+              <td>{d.countryName}</td>
+              <td>{d.continent}</td>
+              <td>{d.year}</td>
+              <td>{d.lifeLadder.toFixed(2)}</td>
+              <td>{d.gpdPerCapita.toFixed(2)}</td>
+              <td>{d.socialSupport.toFixed(2)}</td>
+              <td>{d.healthyLifeExpectancyAtBirth.toFixed(0)}</td>
+              <td>{d.freedomToMakeLifeChoices.toFixed(2)}</td>
+              <td>{d.generosity.toFixed(2)}</td>
+              <td>{d.corruption.toFixed(2)}</td>
+              <td>{d.positiveAffect.toFixed(2)}</td>
+              <td>{d.negativeAffect.toFixed(2)}</td>
+            </tr>
+          ))}
       </tbody>
     </table>
   );

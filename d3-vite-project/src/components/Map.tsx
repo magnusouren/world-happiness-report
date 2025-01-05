@@ -7,35 +7,41 @@ export interface DataRow {
   countryName: string;
   year: number;
   lifeLadder: number;
-  logGdpPerCapita: number;
+  gpdPerCapita: number;
   socialSupport: number;
   healthyLifeExpectancyAtBirth: number;
   freedomToMakeLifeChoices: number;
   generosity: number;
-  perceptionsOfCorruption: number;
+  corruption: number;
   positiveAffect: number;
   negativeAffect: number;
   continent: string;
-  logGdpPerCapitaNormalized: number;
-  socialSupportNormalized: number;
-  healthyLifeExpectancyAtBirthNormalized: number;
-  freedomToMakeLifeChoicesNormalized: number;
-  generosityNormalized: number;
-  perceptionsOfCorruptionNormalized: number;
+  gpdPerCapita_z: number;
+  socialSupport_z: number;
+  healthyLifeExpectancyAtBirth_z: number;
+  freedomToMakeLifeChoices_z: number;
+  generosity_z: number;
+  corruption_z: number;
   pca1: number;
   pca2: number;
 }
 
 interface MapProps {
+  hoveredCountry: string | null;
   countries: DataRow[];
   geoJsonData: any; // GeoJSON data for countries
-  selectedCountries: string[];
-  setSelectedCountries: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedCountries: { countryName: string; year: number }[];
+  setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedCountries: React.Dispatch<
+    React.SetStateAction<{ countryName: string; year: number }[]>
+  >;
 }
 
 export const Map: React.FC<MapProps> = ({
   countries,
+  hoveredCountry,
   geoJsonData,
+  setHoveredCountry,
   setSelectedCountries,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -67,6 +73,7 @@ export const Map: React.FC<MapProps> = ({
       .join('path')
       .attr('d', (d: any) => pathGenerator(d) ?? '')
       .attr('fill', (d: any) => {
+        if (d.properties.name === hoveredCountry) return 'orange';
         const countryData = countries.find(
           (c) => c.countryName === d.properties.name
         );
@@ -76,11 +83,13 @@ export const Map: React.FC<MapProps> = ({
       .attr('stroke', '#333')
       .attr('stroke-width', 0.6)
       .attr('cursor', 'pointer')
-      .on('mouseover', (event) => {
+      .on('mouseover', (event, d: any) => {
         d3.select(event.currentTarget).attr('fill', 'orange');
+        setHoveredCountry(d.properties.name);
       })
       .on('mouseout', (event) => {
         d3.select(event.currentTarget).attr('fill', (d: any) => {
+          setHoveredCountry(null);
           const countryData = countries.find(
             (c) => c.countryName === d.properties.name
           );
@@ -93,12 +102,30 @@ export const Map: React.FC<MapProps> = ({
         );
         if (countryData?.countryName) {
           d3.select(event.currentTarget).attr('stroke-width', 2);
-          setSelectedCountries((prev: string[]) => {
-            if (prev.includes(countryData.countryName)) {
-              return prev.filter((c) => c !== countryData.countryName);
+          setSelectedCountries(
+            (prev: { countryName: string; year: number }[]) => {
+              if (
+                prev.some(
+                  (c) =>
+                    c.countryName === countryData?.countryName &&
+                    c.year === countryData?.year
+                )
+              ) {
+                return prev.filter(
+                  (c) =>
+                    c.countryName !== countryData?.countryName ||
+                    c.year !== countryData?.year
+                );
+              }
+              return [
+                ...prev,
+                {
+                  countryName: countryData?.countryName,
+                  year: countryData?.year,
+                },
+              ];
             }
-            return [...prev, countryData.countryName];
-          });
+          );
         }
       })
       .append('title')

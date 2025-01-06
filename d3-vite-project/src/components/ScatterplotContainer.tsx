@@ -23,68 +23,93 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
   const [xColumn, setXColumn] = useState<keyof DataRow>('pca1');
   const [yColumn, setYColumn] = useState<keyof DataRow>('pca2');
   const [year, setYear] = useState<number>(2023);
-  const [continent, setContinent] = useState<string>('Europe');
+  const [continent, setContinent] = useState<string>('All');
 
   useEffect(() => {
     setHoveredCountry(null);
   }, [xColumn, yColumn, year, continent, setHoveredCountry]);
 
+  const convertKeyToLabel = (key: string) => {
+    // Check if the key contains '_z'
+    if (key.includes('_z')) {
+      // Remove '_z' and add 'Normalized' at the start of the string
+      key = `normalized ${key.replace('_z', '')}`;
+    }
+
+    // Convert camelCase to space-separated and capitalize the first letter
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase());
+  };
+
   return (
     <div id="scatterplot-container">
       <div id="scatterplot-controls">
-        <select
-          value={xColumn}
-          onChange={(e) => setXColumn(e.target.value as keyof DataRow)}
-        >
-          {Object.keys(data[0] || {})
-            .filter(
-              (k) => k !== 'countryName' && k !== 'year' && k !== 'continent'
-            )
-            .map((key) => (
-              <option key={key} value={key}>
-                {key}
+        <div>
+          <label>X-axis:</label>
+          <select
+            value={xColumn}
+            onChange={(e) => setXColumn(e.target.value as keyof DataRow)}
+          >
+            {Object.keys(data[0] || {})
+              .filter(
+                (k) => k !== 'countryName' && k !== 'year' && k !== 'continent'
+              )
+              .map((key) => (
+                <option key={key} value={key}>
+                  {convertKeyToLabel(key)}
+                </option>
+              ))}
+          </select>
+        </div>
+        <div>
+          <label>Y-axis:</label>
+          <select
+            value={yColumn}
+            onChange={(e) => setYColumn(e.target.value as keyof DataRow)}
+          >
+            {Object.keys(data[0] || {})
+              .filter(
+                (k) => k !== 'countryName' && k !== 'year' && k !== 'continent'
+              )
+              .map((key) => (
+                <option key={key} value={key}>
+                  {convertKeyToLabel(key)}
+                </option>
+              ))}
+          </select>
+        </div>
+        <div>
+          <label>Year:</label>
+          <select
+            value={year}
+            onChange={(e) => setYear(parseInt(e.target.value))}
+          >
+            {Array.from(new Set(data.map((d) => d.year))).map((year) => (
+              <option key={year} value={year}>
+                {year}
               </option>
             ))}
-        </select>
-        <select
-          value={yColumn}
-          onChange={(e) => setYColumn(e.target.value as keyof DataRow)}
-        >
-          {Object.keys(data[0] || {})
-            .filter(
-              (k) => k !== 'countryName' && k !== 'year' && k !== 'continent'
-            )
-            .map((key) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-        </select>
-        <select
-          value={year}
-          onChange={(e) => setYear(parseInt(e.target.value))}
-        >
-          {Array.from(new Set(data.map((d) => d.year))).map((year) => (
-            <option key={year} value={year}>
-              {year}
+          </select>
+        </div>
+        <div>
+          <label>Continent:</label>
+          <select
+            value={continent}
+            onChange={(e) => setContinent(e.target.value)}
+          >
+            {Array.from(new Set(data.map((d) => d.continent))).map(
+              (continent) => (
+                <option key={continent} value={continent}>
+                  {continent}
+                </option>
+              )
+            )}
+            <option key="All" value="All">
+              All
             </option>
-          ))}
-        </select>
-        <select
-          value={continent}
-          onChange={(e) => setContinent(e.target.value)}
-        >
-          {Array.from(new Set(data.map((d) => d.continent))).map(
-            (continent) => (
-              <option key={continent} value={continent}>
-                {continent}
-              </option>
-            )
-          )}
-          <option key="All" value="All">
-            All
-          </option>
-        </select>
+          </select>
+        </div>
       </div>
       <ScatterPlot
         data={data.filter(

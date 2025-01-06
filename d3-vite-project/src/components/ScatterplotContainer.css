@@ -1,16 +1,31 @@
-#scatterplot-controls > select {
-  max-width: 100px;
+#scatterplot-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 25%;
 }
 
 #scatterplot-controls {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-#scatterplot-container {
+#scatterplot-controls > div {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: 10px;
-  padding: 5px;
+  justify-content: center;
+}
+
+#scatterplot-controls > div > label {
+  font-size: 0.7rem;
+}
+
+#scatterplot-controls > div > select {
+  max-width: 80px;
+  height: 1.1rem;
 }

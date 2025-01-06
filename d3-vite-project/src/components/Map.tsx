@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { geoPath, geoMercator } from 'd3-geo';
 
+import './Map.css';
+
 export interface DataRow {
   countryName: string;
   year: number;
@@ -45,15 +47,15 @@ export const Map: React.FC<MapProps> = ({
   setSelectedCountries,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const gradientRef = useRef<SVGSVGElement>(null);
+
+  const width = 630;
+  const height = 600;
 
   useEffect(() => {
     if (!geoJsonData || !countries) return;
 
     // Opprett SVG
     const svg = d3.select(svgRef.current);
-    const width = 800;
-    const height = 500;
 
     // Lag en projeksjon og geopath
     const projection = geoMercator().fitSize([width, height], geoJsonData);
@@ -139,9 +141,9 @@ export const Map: React.FC<MapProps> = ({
       });
 
     // Gradient-legende
-    const gradientSvg = d3.select(gradientRef.current);
-    const gradientWidth = 800;
-    const gradientHeight = 20;
+    const gradientSvg = d3.select(svgRef.current);
+    const gradientWidth = width;
+    const gradientHeight = 15;
 
     const gradientScale = d3
       .scaleLinear()
@@ -155,7 +157,7 @@ export const Map: React.FC<MapProps> = ({
       .data(gradientData)
       .join('rect')
       .attr('x', (d) => d)
-      .attr('y', 0)
+      .attr('y', height - 50)
       .attr('width', 1)
       .attr('height', gradientHeight)
       .attr('fill', (d) => colorScale(gradientScale(d)));
@@ -165,23 +167,35 @@ export const Map: React.FC<MapProps> = ({
       .selectAll('text')
       .data([0, 5, 10])
       .join('text')
-      .attr('x', (d) => (d / 10) * gradientWidth)
-      .attr('y', gradientHeight + 15)
+      .attr('x', (d) => (typeof d === 'number' ? (d / 10) * gradientWidth : 0))
+      .attr('y', height - 55)
       .attr('text-anchor', (d) =>
-        d === 0 ? 'start' : d === 10 ? 'end' : 'middle'
+        typeof d === 'number'
+          ? d === 0
+            ? 'start'
+            : d === 10
+            ? 'end'
+            : 'middle'
+          : 'start'
       )
       .attr('font-size', 12)
       .attr('fill', 'black')
-      .text((d) => d);
+      .text((d) => (typeof d === 'number' ? d : d));
+
+    // Legg til tekst for "Life Ladder Score"
+    gradientSvg
+      .append('text')
+      .attr('x', 0)
+      .attr('y', height - 70)
+      .attr('text-anchor', 'start')
+      .attr('font-size', 12)
+      .attr('fill', 'black')
+      .text('Life Ladder Score');
   }, [countries, geoJsonData, setSelectedCountries]);
 
   return (
-    <div>
-      <svg ref={svgRef} width="800" height="500"></svg>
-      <div>
-        <p>Life Ladder: Happiness score from 0 to 10</p>
-        <svg ref={gradientRef} width="800" height="50"></svg>
-      </div>
+    <div id="map-container">
+      <svg ref={svgRef} width={width} height={height}></svg>
     </div>
   );
 };

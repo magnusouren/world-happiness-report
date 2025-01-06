@@ -12,7 +12,7 @@ export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
         alignItems: 'center',
         gap: '10px',
         position: 'relative',
-        width: '98%',
+        width: '90%',
       }}
     >
       {/* Slider Container */}
@@ -21,7 +21,7 @@ export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
         <div
           style={{
             position: 'absolute',
-            left: `${((year - 2013) / (2023 - 2013)) * 100}%`,
+            left: `${((year - 2008) / (2023 - 2008)) * 100}%`,
             transform: 'translateX(-50%)',
             bottom: '25px', // Adjust for bubble position
             background: '#007BFF',

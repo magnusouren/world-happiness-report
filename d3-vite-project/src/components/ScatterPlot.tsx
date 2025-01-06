@@ -17,8 +17,8 @@ interface ScatterPlotProps {
 }
 
 const sizeMap = {
-  small: { width: 400, height: 400 },
-  medium: { width: 600, height: 600 },
+  small: { width: 300, height: 300 },
+  medium: { width: 500, height: 500 },
   large: { width: 800, height: 800 },
 };
 
@@ -67,7 +67,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     // Dimensions
     const width = sizeMap[size].width;
     const height = sizeMap[size].height;
-    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+    const margin = { top: 10, right: 10, bottom: 50, left: 50 };
 
     // Clear previous SVG content
     d3.select(svgRef.current).selectAll('*').remove();
@@ -76,6 +76,12 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     const colorScale = d3
       .scaleOrdinal(d3.schemeObservable10)
       .domain(Array.from(new Set(data.map((d) => d.continent))));
+
+    const getPointSize = () => {
+      if (size === 'small') return 3;
+      if (size === 'medium') return 5;
+      return 7;
+    };
 
     // Create SVG container
     const svg = d3
@@ -155,19 +161,22 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       .attr('class', 'point')
       .attr('cx', (d) => xScale(d[xColumn] as number))
       .attr('cy', (d) => yScale(d[yColumn] as number))
-      .attr('r', 5)
+      .attr('r', getPointSize())
       .attr('fill', (d) => colorScale(d.continent));
 
     // Raise points that match hoveredCountry
     points
       .filter((d) => d.countryName === hoveredCountry)
       .raise()
-      .attr('r', 7)
+      .attr('r', getPointSize())
       .attr('fill', 'red');
 
     points
       .on('mouseover', (event, d) => {
-        d3.select(event.currentTarget).attr('fill', 'red').attr('r', 7).raise();
+        d3.select(event.currentTarget)
+          .attr('fill', 'red')
+          .attr('r', getPointSize())
+          .raise();
         setHoveredCountry(d.countryName);
 
         // Add text element next to the pointer
@@ -185,7 +194,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       .on('mouseout', (event, d) => {
         d3.select(event.currentTarget)
           .attr('fill', colorScale(d.continent))
-          .attr('r', 5);
+          .attr('r', getPointSize());
         setHoveredCountry(null);
         svg.select('#tooltip').remove();
       });

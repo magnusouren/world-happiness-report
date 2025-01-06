@@ -28,37 +28,43 @@ function App() {
   const countryData: DataRow[] = data as unknown as DataRow[];
 
   return (
-    <div>
+    <main>
       <h1>World Happiness Analysis</h1>
       <section>
-        <div>
-          <Slider year={year} setYear={setYear} />
-          {geoJson ? (
-            <Map
-              countries={countryData.filter((c) => c.year == year)}
-              geoJsonData={geoJson}
-              selectedCountries={selectedCountries}
-              setSelectedCountries={setSelectedCountries}
-              hoveredCountry={hoveredCountry}
-              setHoveredCountry={setHoveredCountry}
-            />
-          ) : (
-            <p>Laster kart...</p>
-          )}
-        </div>
-        <div>
-          <ScatterPlot
-            data={countryData.filter((c) => c.year == year)}
-            hoveredCountry={hoveredCountry}
-            xColumn={'pca1'}
-            yColumn={'pca2'}
-            setSelectedCountries={setSelectedCountries}
-            setHoveredCountry={setHoveredCountry}
-            selectedCountries={selectedCountries}
-          />
-        </div>
+        <Slider year={year} setYear={setYear} />
       </section>
       <section>
+        {geoJson ? (
+          <Map
+            countries={countryData.filter((c) => c.year == year)}
+            geoJsonData={geoJson}
+            selectedCountries={selectedCountries}
+            setSelectedCountries={setSelectedCountries}
+            hoveredCountry={hoveredCountry}
+            setHoveredCountry={setHoveredCountry}
+          />
+        ) : (
+          <p>Laster kart...</p>
+        )}
+
+        <ScatterPlot
+          data={countryData.filter((c) => c.year == year)}
+          hoveredCountry={hoveredCountry}
+          xColumn={'pca1'}
+          yColumn={'pca2'}
+          setSelectedCountries={setSelectedCountries}
+          setHoveredCountry={setHoveredCountry}
+          selectedCountries={selectedCountries}
+        />
+      </section>
+      <section id="scatterplots">
+        <ScatterPlotContainer
+          data={countryData}
+          hoveredCountry={hoveredCountry}
+          selectedCountries={selectedCountries}
+          setHoveredCountry={setHoveredCountry}
+          setSelectedCountries={setSelectedCountries}
+        />
         <ScatterPlotContainer
           data={countryData}
           hoveredCountry={hoveredCountry}
@@ -84,7 +90,7 @@ function App() {
       <section>
         <CountryTable countries={selectedCountries} data={countryData} />
       </section>
-    </div>
+    </main>
   );
 }
 

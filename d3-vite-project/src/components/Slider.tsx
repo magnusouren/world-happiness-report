@@ -1,13 +1,20 @@
-
 interface SliderProps {
-    year: number;
-    setYear: (year: number) => void;
-    }
+  year: number;
+  setYear: (year: number) => void;
+}
 
 export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', position: 'relative', width: '98%' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '10px',
+        position: 'relative',
+        width: '98%',
+      }}
+    >
       {/* Slider Container */}
       <div style={{ position: 'relative', width: '100%' }}>
         {/* Value Bubble */}
@@ -30,7 +37,7 @@ export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
         {/* Slider */}
         <input
           type="range"
-          min="2013"
+          min="2008"
           max="2023"
           step={1}
           value={year}
@@ -50,4 +57,3 @@ export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
     </div>
   );
 };
-

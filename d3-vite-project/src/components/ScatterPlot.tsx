@@ -5,30 +5,68 @@ import { DataRow } from './Map';
 interface ScatterPlotProps {
   data: DataRow[];
   hoveredCountry: string | null;
+  xColumn: keyof DataRow;
+  yColumn: keyof DataRow;
+  dynamicAxis?: boolean;
+  size?: 'small' | 'medium' | 'large';
+  selectedCountries: { countryName: string; year: number }[];
   setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedCountries: React.Dispatch<
+    React.SetStateAction<{ countryName: string; year: number }[]>
+  >;
 }
+
+const sizeMap = {
+  small: { width: 400, height: 400 },
+  medium: { width: 600, height: 600 },
+  large: { width: 800, height: 800 },
+};
 
 export const ScatterPlot: React.FC<ScatterPlotProps> = ({
   data,
   hoveredCountry,
+  dynamicAxis = false,
+  xColumn,
+  yColumn,
+  size = 'medium',
   setHoveredCountry,
+  setSelectedCountries,
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     if (!data || data.length === 0) return;
 
-    // Default x and y axes
-    const xColumn = 'pca1';
-    const yColumn = 'pca2';
+    let xDomain: [number, number];
+    let yDomain: [number, number];
 
-    // Fixed domains for axes
-    const xDomain: [number, number] = [-5, 5]; // Example fixed range for PCA1
-    const yDomain: [number, number] = [-5, 5]; // Example fixed range for PCA2
+    if (dynamicAxis) {
+      // Dynamic domains for axes
+      xDomain = d3.extent(data, (d) => d[xColumn] as number) as [
+        number,
+        number
+      ];
+      yDomain = d3.extent(data, (d) => d[yColumn] as number) as [
+        number,
+        number
+      ];
+      xDomain = [
+        Math.min(0, xDomain[0] - 0.1 * (xDomain[1] - xDomain[0])),
+        xDomain[1] + 0.1 * (xDomain[1] - xDomain[0]),
+      ];
+      yDomain = [
+        Math.min(0, yDomain[0] - 0.1 * (yDomain[1] - yDomain[0])),
+        yDomain[1] + 0.1 * (yDomain[1] - yDomain[0]),
+      ];
+    } else {
+      // Fixed domains for axes
+      xDomain = [-6, 6]; // Example fixed range for PCA1
+      yDomain = [-6, 6]; // Example fixed range for PCA2
+    }
 
     // Dimensions
-    const width = 600;
-    const height = 600;
+    const width = sizeMap[size].width;
+    const height = sizeMap[size].height;
     const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 
     // Clear previous SVG content
@@ -151,6 +189,37 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
         setHoveredCountry(null);
         svg.select('#tooltip').remove();
       });
+
+    points.on('click', (event, d) => {
+      const countryData = data.find((c) => c.countryName === d.countryName);
+      if (countryData?.countryName) {
+        d3.select(event.currentTarget).attr('stroke-width', 2);
+        setSelectedCountries(
+          (prev: { countryName: string; year: number }[]) => {
+            if (
+              prev.some(
+                (c) =>
+                  c.countryName === countryData?.countryName &&
+                  c.year === countryData?.year
+              )
+            ) {
+              return prev.filter(
+                (c) =>
+                  c.countryName !== countryData?.countryName ||
+                  c.year !== countryData?.year
+              );
+            }
+            return [
+              ...prev,
+              {
+                countryName: countryData?.countryName,
+                year: countryData?.year,
+              },
+            ];
+          }
+        );
+      }
+    });
   }, [data, hoveredCountry, setHoveredCountry]);
 
   return (

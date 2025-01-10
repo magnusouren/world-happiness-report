@@ -3,23 +3,102 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: 90%;
+  margin: auto;
 }
 
 section {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   margin: auto;
   width: 100%;
 }
 
+header {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+footer {
+  margin-top: 5rem;
+  font-weight: 300;
+  text-align: center;
+  border-top: 1px solid #c8c8c8;
+  padding-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+footer > p {
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: medium;
+}
+
+button {
+  background-color: white;
+  color: black;
+  font-weight: 600;
+  padding: 0.2rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid #2f4f8a;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #2f4f8a;
+  color: white;
+}
+
 #scatterplots {
-  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+}
+
+#description {
+  background-color: #e8e8e8;
+  margin-bottom: 2rem;
+  font-size: smaller;
+  padding: 1rem 20%;
+  text-overflow: ellipsis;
+}
+
+#slider-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#slider-container > h2 {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+#table-container {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
+
+#scatterplot-buttons {
+  width: 25%;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#zoom-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
 }

@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import { geoPath, geoMercator } from 'd3-geo';
 
 import './Map.css';
+import { getPlotColor } from '../utils';
 
 export interface DataRow {
   countryName: string;
@@ -54,28 +55,26 @@ export const Map: React.FC<MapProps> = ({
   useEffect(() => {
     if (!geoJsonData || !countries) return;
 
-    // Opprett SVG
     const svg = d3.select(svgRef.current);
 
-    // Lag en projeksjon og geopath
     const projection = geoMercator().fitSize([width, height], geoJsonData);
     const pathGenerator = geoPath().projection(projection);
 
-    // Fargefunksjon ved bruk av d3 skala fra rød til blå
+    // Create a color scale
     const colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([0, 10]);
 
     const getColor = (value: number) => {
       return colorScale(value);
     };
 
-    // Tegn kartet
     svg
       .selectAll('path')
       .data(geoJsonData.features)
       .join('path')
       .attr('d', (d: any) => pathGenerator(d) ?? '')
       .attr('fill', (d: any) => {
-        if (d.properties.name === hoveredCountry) return 'orange';
+        if (d.properties.name === hoveredCountry)
+          return getPlotColor('Hovered');
         const countryData = countries.find(
           (c) => c.countryName === d.properties.name
         );
@@ -86,7 +85,7 @@ export const Map: React.FC<MapProps> = ({
       .attr('stroke-width', 0.6)
       .attr('cursor', 'pointer')
       .on('mouseover', (event, d: any) => {
-        d3.select(event.currentTarget).attr('fill', 'orange');
+        d3.select(event.currentTarget).attr('fill', getPlotColor('Hovered'));
         setHoveredCountry(d.properties.name);
       })
       .on('mouseout', (event) => {
@@ -140,7 +139,7 @@ export const Map: React.FC<MapProps> = ({
           : `${d.properties.name}: No data`;
       });
 
-    // Gradient-legende
+    // Gradient-bar for lifeLadder
     const gradientSvg = d3.select(svgRef.current);
     const gradientWidth = width;
     const gradientHeight = 15;
@@ -191,7 +190,13 @@ export const Map: React.FC<MapProps> = ({
       .attr('font-size', 12)
       .attr('fill', 'black')
       .text('Life Ladder Score');
-  }, [countries, geoJsonData, setSelectedCountries]);
+  }, [
+    countries,
+    geoJsonData,
+    hoveredCountry,
+    setHoveredCountry,
+    setSelectedCountries,
+  ]);
 
   return (
     <div id="map-container">

@@ -12,19 +12,18 @@ export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
         alignItems: 'center',
         gap: '10px',
         position: 'relative',
-        width: '90%',
+        width: '100%',
+        marginBottom: '20px',
       }}
     >
-      {/* Slider Container */}
       <div style={{ position: 'relative', width: '100%' }}>
-        {/* Value Bubble */}
         <div
           style={{
             position: 'absolute',
-            left: `${((year - 2008) / (2023 - 2008)) * 100}%`,
+            left: `${((year - 2005) / (2023 - 2005)) * 100}%`,
             transform: 'translateX(-50%)',
-            bottom: '25px', // Adjust for bubble position
-            background: '#007BFF',
+            bottom: '25px',
+            background: '#2f4f8a',
             color: 'white',
             padding: '5px 10px',
             borderRadius: '5px',
@@ -34,10 +33,9 @@ export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
         >
           {year}
         </div>
-        {/* Slider */}
         <input
           type="range"
-          min="2008"
+          min="2005"
           max="2023"
           step={1}
           value={year}
@@ -46,7 +44,7 @@ export const Slider: React.FC<SliderProps> = ({ year, setYear }) => {
             width: '100%',
             appearance: 'none',
             height: '8px',
-            background: '#ddd',
+            background: '#E9ECEF',
             borderRadius: '4px',
             outline: 'none',
             cursor: 'pointer',

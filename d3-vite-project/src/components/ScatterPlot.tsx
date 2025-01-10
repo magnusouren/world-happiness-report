@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { DataRow } from './Map';
+import { getPlotColor, prettierColumnName } from '../utils';
 
 interface ScatterPlotProps {
   data: DataRow[];
@@ -8,6 +9,7 @@ interface ScatterPlotProps {
   xColumn: keyof DataRow;
   yColumn: keyof DataRow;
   dynamicAxis?: boolean;
+  showRegressionLine?: boolean;
   size?: 'small' | 'medium' | 'large';
   selectedCountries: { countryName: string; year: number }[];
   setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
@@ -19,15 +21,17 @@ interface ScatterPlotProps {
 const sizeMap = {
   small: { width: 300, height: 300 },
   medium: { width: 500, height: 500 },
-  large: { width: 800, height: 800 },
+  large: { width: 700, height: 700 },
 };
 
 export const ScatterPlot: React.FC<ScatterPlotProps> = ({
   data,
   hoveredCountry,
   dynamicAxis = false,
+  selectedCountries,
   xColumn,
   yColumn,
+  showRegressionLine = false,
   size = 'medium',
   setHoveredCountry,
   setSelectedCountries,
@@ -60,8 +64,8 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       ];
     } else {
       // Fixed domains for axes
-      xDomain = [-6, 6]; // Example fixed range for PCA1
-      yDomain = [-6, 6]; // Example fixed range for PCA2
+      xDomain = [-6, 5]; // Example fixed range for PCA1
+      yDomain = [-6, 5]; // Example fixed range for PCA2
     }
 
     // Dimensions
@@ -72,15 +76,10 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     // Clear previous SVG content
     d3.select(svgRef.current).selectAll('*').remove();
 
-    // Color scale for continents
-    const colorScale = d3
-      .scaleOrdinal(d3.schemeObservable10)
-      .domain(Array.from(new Set(data.map((d) => d.continent))));
-
     const getPointSize = () => {
       if (size === 'small') return 3;
-      if (size === 'medium') return 5;
-      return 7;
+      if (size === 'medium') return 4;
+      return 5;
     };
 
     // Create SVG container
@@ -103,30 +102,6 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     const xAxis = d3.axisBottom(xScale);
     const yAxis = d3.axisLeft(yScale);
 
-    svg
-      .append('g')
-      .attr('transform', `translate(0, ${plotHeight})`)
-      .call(xAxis)
-      .append('text')
-      .attr('x', plotWidth / 2)
-      .attr('y', 40)
-      .attr('fill', 'black')
-      .style('font-size', '14px')
-      .style('text-anchor', 'middle')
-      .text(xColumn);
-
-    svg
-      .append('g')
-      .call(yAxis)
-      .append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('x', -plotHeight / 2)
-      .attr('y', -40)
-      .attr('fill', 'black')
-      .style('font-size', '14px')
-      .style('text-anchor', 'middle')
-      .text(yColumn);
-
     // Points
     svg
       .append('g')
@@ -137,8 +112,12 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       .attr('y', 40)
       .attr('fill', 'black')
       .style('font-size', '14px')
+      .style(
+        'font-family',
+        'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif'
+      )
       .style('text-anchor', 'middle')
-      .text(xColumn);
+      .text(prettierColumnName(xColumn));
 
     svg
       .append('g')
@@ -149,8 +128,12 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       .attr('y', -40)
       .attr('fill', 'black')
       .style('font-size', '14px')
+      .style(
+        'font-family',
+        'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif'
+      )
       .style('text-anchor', 'middle')
-      .text(yColumn);
+      .text(prettierColumnName(yColumn));
 
     // Points
     const points = svg
@@ -162,20 +145,33 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       .attr('cx', (d) => xScale(d[xColumn] as number))
       .attr('cy', (d) => yScale(d[yColumn] as number))
       .attr('r', getPointSize())
-      .attr('fill', (d) => colorScale(d.continent));
+      .attr('fill', (d) => getPlotColor(d.continent));
 
     // Raise points that match hoveredCountry
     points
       .filter((d) => d.countryName === hoveredCountry)
       .raise()
-      .attr('r', getPointSize())
-      .attr('fill', 'red');
+      .attr('r', getPointSize() + 2)
+      .attr('fill', getPlotColor('Hovered'))
+      .style('filter', 'drop-shadow(0px 0px 2px #000000)');
+
+    points
+      .filter((d) =>
+        selectedCountries.some(
+          (c) => c.countryName === d.countryName && c.year === d.year
+        )
+      )
+      .attr('stroke', 'yellow')
+      .attr('stroke-width', getPointSize() - 1)
+      .style('filter', 'drop-shadow(0px 0px 1px #000000)')
+      .raise();
 
     points
       .on('mouseover', (event, d) => {
         d3.select(event.currentTarget)
-          .attr('fill', 'red')
-          .attr('r', getPointSize())
+          .attr('fill', getPlotColor('Hovered'))
+          .attr('r', getPointSize() + 1)
+          .attr('cursor', 'pointer')
           .raise();
         setHoveredCountry(d.countryName);
 
@@ -189,11 +185,15 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
           .style('font-size', '14px')
           .style('text-anchor', 'middle')
           .style('font-weight', '500')
+          .style(
+            'font-family',
+            'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif'
+          )
           .text(d.countryName);
       })
       .on('mouseout', (event, d) => {
         d3.select(event.currentTarget)
-          .attr('fill', colorScale(d.continent))
+          .attr('fill', getPlotColor(d.continent))
           .attr('r', getPointSize());
         setHoveredCountry(null);
         svg.select('#tooltip').remove();
@@ -229,7 +229,61 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
         );
       }
     });
-  }, [data, hoveredCountry, setHoveredCountry]);
+
+    // Calculate linear regression line
+    const regression = (
+      data: DataRow[],
+      xColumn: keyof DataRow,
+      yColumn: keyof DataRow
+    ) => {
+      const xMean = d3.mean(data, (d) => d[xColumn] as number) ?? 0;
+      const yMean = d3.mean(data, (d) => d[yColumn] as number) ?? 0;
+
+      let numerator = 0;
+      let denominator = 0;
+
+      data.forEach((d) => {
+        const x = d[xColumn] as number;
+        const y = d[yColumn] as number;
+        numerator += (x - xMean) * (y - yMean);
+        denominator += (x - xMean) ** 2;
+      });
+
+      const slope = numerator / denominator;
+      const intercept = yMean - slope * xMean;
+
+      return { slope, intercept };
+    };
+
+    const { slope, intercept } = regression(data, xColumn, yColumn);
+
+    // Add regression line
+    svg
+      .append('line')
+      .attr('x1', xScale(xDomain[0]))
+      .attr('y1', yScale(intercept + slope * xDomain[0]))
+      .attr('x2', xScale(xDomain[1]))
+      .attr('y2', yScale(intercept + slope * xDomain[1]))
+      .attr('stroke', 'black')
+      .attr('stroke-width', showRegressionLine ? 1 : 0)
+      .attr('stroke-dasharray', '4,4');
+
+    svg.on('mouseout', () => {
+      setHoveredCountry(null);
+      svg.select('#tooltip').remove();
+    });
+  }, [
+    data,
+    showRegressionLine,
+    dynamicAxis,
+    hoveredCountry,
+    selectedCountries,
+    setHoveredCountry,
+    setSelectedCountries,
+    size,
+    xColumn,
+    yColumn,
+  ]);
 
   return (
     <div>

@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { DataRow } from './Map';
 import { ScatterPlot } from './ScatterPlot';
 import './ScatterPlotContainer.css';
+import { prettierColumnName } from '../utils';
 
 interface ScatterPlotContainerProps {
   data: DataRow[];
+  size?: 'small' | 'medium' | 'large';
   hoveredCountry: string | null;
   selectedCountries: { countryName: string; year: number }[];
   setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
@@ -15,6 +17,7 @@ interface ScatterPlotContainerProps {
 
 export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
   data,
+  size = 'medium',
   hoveredCountry,
   selectedCountries,
   setHoveredCountry,
@@ -24,23 +27,11 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
   const [yColumn, setYColumn] = useState<keyof DataRow>('pca2');
   const [year, setYear] = useState<number>(2023);
   const [continent, setContinent] = useState<string>('All');
+  const [linearRegression, setLinearRegression] = useState<boolean>(false);
 
   useEffect(() => {
     setHoveredCountry(null);
   }, [xColumn, yColumn, year, continent, setHoveredCountry]);
-
-  const convertKeyToLabel = (key: string) => {
-    // Check if the key contains '_z'
-    if (key.includes('_z')) {
-      // Remove '_z' and add 'Normalized' at the start of the string
-      key = `normalized ${key.replace('_z', '')}`;
-    }
-
-    // Convert camelCase to space-separated and capitalize the first letter
-    return key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, (str) => str.toUpperCase());
-  };
 
   return (
     <div id="scatterplot-container">
@@ -57,7 +48,7 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
               )
               .map((key) => (
                 <option key={key} value={key}>
-                  {convertKeyToLabel(key)}
+                  {prettierColumnName(key)}
                 </option>
               ))}
           </select>
@@ -74,7 +65,7 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
               )
               .map((key) => (
                 <option key={key} value={key}>
-                  {convertKeyToLabel(key)}
+                  {prettierColumnName(key)}
                 </option>
               ))}
           </select>
@@ -85,11 +76,13 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
             value={year}
             onChange={(e) => setYear(parseInt(e.target.value))}
           >
-            {Array.from(new Set(data.map((d) => d.year))).map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
+            {Array.from(new Set(data.map((d) => d.year)))
+              .sort((a, b) => a - b)
+              .map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
           </select>
         </div>
         <div>
@@ -98,17 +91,26 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
             value={continent}
             onChange={(e) => setContinent(e.target.value)}
           >
-            {Array.from(new Set(data.map((d) => d.continent))).map(
-              (continent) => (
-                <option key={continent} value={continent}>
-                  {continent}
-                </option>
-              )
-            )}
             <option key="All" value="All">
               All
             </option>
+            {Array.from(new Set(data.map((d) => d.continent)))
+              .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+              .map((continent) => (
+                <option key={continent} value={continent}>
+                  {continent}
+                </option>
+              ))}
           </select>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'start', width: '50px' }}>
+          <label>Lin. Reg.</label>
+          <input
+            type="checkbox"
+            checked={linearRegression}
+            onChange={(e) => setLinearRegression(e.target.checked)}
+            style={{ height: '14px', width: '14px' }}
+          />
         </div>
       </div>
       <ScatterPlot
@@ -121,7 +123,8 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
         dynamicAxis={xColumn === 'pca1' && yColumn === 'pca2' ? false : true}
         xColumn={xColumn}
         yColumn={yColumn}
-        size="small"
+        showRegressionLine={linearRegression}
+        size={size}
         setSelectedCountries={setSelectedCountries}
         setHoveredCountry={setHoveredCountry}
         selectedCountries={selectedCountries}

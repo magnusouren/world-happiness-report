@@ -1,33 +1,33 @@
 import { getPlotColor } from '../utils';
 
+const values = [
+  'Africa',
+  'Asia',
+  'Europe',
+  'North America',
+  'Oceania',
+  'South America',
+  'Hovered',
+];
+
+const legendsStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '2rem',
+  marginBottom: '0.5rem',
+  flexWrap: 'wrap',
+};
+
+const legendStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: '0.1rem',
+};
+
 export const Legends = () => {
-  const values = [
-    'Africa',
-    'Asia',
-    'Europe',
-    'North America',
-    'Oceania',
-    'South America',
-    'Hovered',
-  ];
-
-  const legendsStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '2rem',
-    marginBottom: '0.5rem',
-    flexWrap: 'wrap',
-  };
-
-  const legendStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '0.1rem',
-  };
-
   return (
     <div style={legendsStyle}>
       {values.map((value) => (

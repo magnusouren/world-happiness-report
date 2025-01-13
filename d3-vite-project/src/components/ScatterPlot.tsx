@@ -1,21 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { DataRow } from './Map';
 import { getPlotColor, prettierColumnName } from '../utils';
+import { Country, SelectedCountry } from '../types';
 
 interface ScatterPlotProps {
-  data: DataRow[];
+  data: Country[];
   hoveredCountry: string | null;
-  xColumn: keyof DataRow;
-  yColumn: keyof DataRow;
+  xColumn: keyof Country;
+  yColumn: keyof Country;
   dynamicAxis?: boolean;
   showRegressionLine?: boolean;
   size?: 'small' | 'medium' | 'large';
-  selectedCountries: { countryName: string; year: number }[];
+  selectedCountries: SelectedCountry[];
   setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedCountries: React.Dispatch<
-    React.SetStateAction<{ countryName: string; year: number }[]>
-  >;
+  setSelectedCountries: React.Dispatch<React.SetStateAction<SelectedCountry[]>>;
 }
 
 const sizeMap = {
@@ -203,39 +201,33 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       const countryData = data.find((c) => c.countryName === d.countryName);
       if (countryData?.countryName) {
         d3.select(event.currentTarget).attr('stroke-width', 2);
-        setSelectedCountries(
-          (prev: { countryName: string; year: number }[]) => {
-            if (
-              prev.some(
-                (c) =>
-                  c.countryName === countryData?.countryName &&
-                  c.year === countryData?.year
-              )
-            ) {
-              return prev.filter(
-                (c) =>
-                  c.countryName !== countryData?.countryName ||
-                  c.year !== countryData?.year
-              );
-            }
-            return [
-              ...prev,
-              {
-                countryName: countryData?.countryName,
-                year: countryData?.year,
-              },
-            ];
+        setSelectedCountries((prev: SelectedCountry[]) => {
+          if (
+            prev.some(
+              (c) =>
+                c.countryName === countryData?.countryName &&
+                c.year === countryData?.year
+            )
+          ) {
+            return prev.filter(
+              (c) =>
+                c.countryName !== countryData?.countryName ||
+                c.year !== countryData?.year
+            );
           }
-        );
+          return [
+            ...prev,
+            {
+              countryName: countryData?.countryName,
+              year: countryData?.year,
+            },
+          ];
+        });
       }
     });
 
     // Calculate linear regression line
-    const regression = (
-      data: DataRow[],
-      xColumn: keyof DataRow,
-      yColumn: keyof DataRow
-    ) => {
+    const regression = (data: Country[]) => {
       const xMean = d3.mean(data, (d) => d[xColumn] as number) ?? 0;
       const yMean = d3.mean(data, (d) => d[yColumn] as number) ?? 0;
 
@@ -255,7 +247,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       return { slope, intercept };
     };
 
-    const { slope, intercept } = regression(data, xColumn, yColumn);
+    const { slope, intercept } = regression(data);
 
     // Add regression line
     svg
@@ -278,11 +270,11 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     dynamicAxis,
     hoveredCountry,
     selectedCountries,
-    setHoveredCountry,
-    setSelectedCountries,
     size,
     xColumn,
     yColumn,
+    setHoveredCountry,
+    setSelectedCountries,
   ]);
 
   return (

@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
-import { DataRow } from './Map';
 import { ScatterPlot } from './ScatterPlot';
 import './ScatterPlotContainer.css';
 import { prettierColumnName } from '../utils';
+import { Country, SelectedCountry } from '../types';
 
 interface ScatterPlotContainerProps {
-  data: DataRow[];
+  data: Country[];
   size?: 'small' | 'medium' | 'large';
   hoveredCountry: string | null;
-  selectedCountries: { countryName: string; year: number }[];
+  selectedCountries: SelectedCountry[];
   setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedCountries: React.Dispatch<
-    React.SetStateAction<{ countryName: string; year: number }[]>
-  >;
+  setSelectedCountries: React.Dispatch<React.SetStateAction<SelectedCountry[]>>;
 }
 
 export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
@@ -23,8 +21,8 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
   setHoveredCountry,
   setSelectedCountries,
 }) => {
-  const [xColumn, setXColumn] = useState<keyof DataRow>('pca1');
-  const [yColumn, setYColumn] = useState<keyof DataRow>('pca2');
+  const [xColumn, setXColumn] = useState<keyof Country>('pca1');
+  const [yColumn, setYColumn] = useState<keyof Country>('pca2');
   const [year, setYear] = useState<number>(2023);
   const [continent, setContinent] = useState<string>('All');
   const [linearRegression, setLinearRegression] = useState<boolean>(false);
@@ -40,7 +38,7 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
           <label>X-axis:</label>
           <select
             value={xColumn}
-            onChange={(e) => setXColumn(e.target.value as keyof DataRow)}
+            onChange={(e) => setXColumn(e.target.value as keyof Country)}
           >
             {Object.keys(data[0] || {})
               .filter(
@@ -57,7 +55,7 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
           <label>Y-axis:</label>
           <select
             value={yColumn}
-            onChange={(e) => setYColumn(e.target.value as keyof DataRow)}
+            onChange={(e) => setYColumn(e.target.value as keyof Country)}
           >
             {Object.keys(data[0] || {})
               .filter(

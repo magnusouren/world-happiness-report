@@ -5,39 +5,15 @@ import { geoPath, geoMercator } from 'd3-geo';
 
 import './Map.css';
 import { getPlotColor } from '../utils';
-
-export interface DataRow {
-  countryName: string;
-  year: number;
-  lifeLadder: number;
-  gpdPerCapita: number;
-  socialSupport: number;
-  healthyLifeExpectancyAtBirth: number;
-  freedomToMakeLifeChoices: number;
-  generosity: number;
-  corruption: number;
-  positiveAffect: number;
-  negativeAffect: number;
-  continent: string;
-  gpdPerCapita_z: number;
-  socialSupport_z: number;
-  healthyLifeExpectancyAtBirth_z: number;
-  freedomToMakeLifeChoices_z: number;
-  generosity_z: number;
-  corruption_z: number;
-  pca1: number;
-  pca2: number;
-}
+import { Country, SelectedCountry } from '../types';
 
 interface MapProps {
   hoveredCountry: string | null;
-  countries: DataRow[];
+  countries: Country[];
   geoJsonData: any; // GeoJSON data for countries
-  selectedCountries: { countryName: string; year: number }[];
+  selectedCountries: SelectedCountry[];
   setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedCountries: React.Dispatch<
-    React.SetStateAction<{ countryName: string; year: number }[]>
-  >;
+  setSelectedCountries: React.Dispatch<React.SetStateAction<SelectedCountry[]>>;
 }
 
 export const Map: React.FC<MapProps> = ({
@@ -60,11 +36,21 @@ export const Map: React.FC<MapProps> = ({
     const projection = geoMercator().fitSize([width, height], geoJsonData);
     const pathGenerator = geoPath().projection(projection);
 
-    // Create a color scale
-    const colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([0, 10]);
+    // Define a power scale to preprocess the lifeLadder values
+    // You can adjust the exponent to control the non-linearity
+    const powerScale = d3
+      .scalePow()
+      .exponent(1) // Change this value to tweak the non-linear transformation
+      .domain([1, 8]) // Input range
+      .range([0, 1]); // Output range for colorScale
 
+    // Create the color scale (still linear in this step)
+    const colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([0, 1]);
+
+    // Function to get color, applying the power scale first
     const getColor = (value: number) => {
-      return colorScale(value);
+      const transformedValue = powerScale(value); // Apply the non-linear transformation
+      return colorScale(transformedValue); // Map the transformed value to a color
     };
 
     svg
@@ -131,7 +117,7 @@ export const Map: React.FC<MapProps> = ({
       })
       .append('title')
       .text((d: any) => {
-        const countryData: DataRow | undefined = countries.find(
+        const countryData: Country | undefined = countries.find(
           (c) => c.countryName === d.properties.name
         );
         return countryData
@@ -159,7 +145,7 @@ export const Map: React.FC<MapProps> = ({
       .attr('y', height - 50)
       .attr('width', 1)
       .attr('height', gradientHeight)
-      .attr('fill', (d) => colorScale(gradientScale(d)));
+      .attr('fill', (d) => getColor(gradientScale(d)));
 
     // Legg til tekst for verdier
     gradientSvg

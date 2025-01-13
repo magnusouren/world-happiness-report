@@ -1,12 +1,11 @@
-import { DataRow } from './Map';
 import './CountryTable.css';
 import { useState } from 'react';
 import { Descriptions } from './Descriptions';
-// import * as d3 from 'd3';
+import { Country, SelectedCountry } from '../types';
 
 interface CountryTableProps {
-  countries: { countryName: string; year: number }[];
-  data: DataRow[];
+  countries: SelectedCountry[];
+  data: Country[];
 }
 
 export const CountryTable: React.FC<CountryTableProps> = ({
@@ -15,23 +14,7 @@ export const CountryTable: React.FC<CountryTableProps> = ({
 }) => {
   const [showDetails, setShowDetails] = useState(true);
 
-  // const colorValue = (key: keyof DataRow, value: number) => {
-  //   const maxValue = Math.max(...data.map((d) => d[key] as number));
-  //   const minValue = Math.min(...data.map((d) => d[key] as number));
-
-  //   console.log(key, value, minValue, maxValue);
-
-  //   const scale = d3.scaleLinear().domain([minValue, maxValue]);
-
-  //   // Generate the base color using d3.interpolateRdYlGn
-  //   const baseColor = d3.interpolateRdYlGn(scale(value));
-
-  //   // Blend with white to create a brighter version
-  //   const brighterColor = d3.interpolateRgb(baseColor, '#ffffff')(0.5); // Adjust the factor (0-1) for brightness
-  //   return brighterColor;
-  // };
-
-  const numericalColumns: [keyof DataRow, number][] = [
+  const numericalColumns: [keyof Country, number][] = [
     ['lifeLadder', 2],
     ['gpdPerCapita', 2],
     ['socialSupport', 2],

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import { DataRow, Map } from './components/Map';
+import { Map } from './components/Map';
 import geoJsonData from './data/custom.geo.json'; // GeoJSON-fil
 
 import data from './data/data.json';
@@ -9,26 +9,25 @@ import { CountryTable } from './components/CountryTable';
 import { ScatterPlot } from './components/ScatterPlot';
 import { ScatterPlotContainer } from './components/ScatterplotContainer';
 import { Legends } from './components/Legends';
+import { Country, SelectedCountry } from './types';
 
 function App() {
-  const [geoJson, setGeoJson] = useState<unknown>(null);
-  const [selectedCountries, setSelectedCountries] = useState<
-    {
-      countryName: string;
-      year: number;
-    }[]
-  >([]);
-  const [year, setYear] = useState<number>(2023);
+  // Global values
+  const [selectedCountries, setSelectedCountries] = useState<SelectedCountry[]>(
+    []
+  );
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const [year, setYear] = useState<number>(2023);
+  const countryData = data as unknown as Country[];
+
+  // Local values
+  const [geoJson, setGeoJson] = useState<unknown>(null);
   const [zoom, setZoom] = useState<number>(90);
   const [amountOfScatterplots, setAmountOfScatterplots] = useState(3);
 
   useEffect(() => {
-    // Last GeoJSON-data hvis det ikke allerede er importert som modul
     setGeoJson(geoJsonData);
   }, []);
-
-  const countryData: DataRow[] = data as unknown as DataRow[];
 
   return (
     <main style={{ zoom: `${zoom}%` }}>
@@ -60,6 +59,10 @@ function App() {
           map or the scatter plots to add them to the table below. Click again
           for removal. The table shows the data for the selected countries for
           the selected year.
+        </p>
+        <p>
+          <strong>Normalized values:</strong> The normalized values is a result
+          of using z-score normalization (Gaussian scaling).
         </p>
       </div>
       <section id="slider-container">

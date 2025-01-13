@@ -61,10 +61,10 @@ function App() {
           of using z-score normalization (Gaussian scaling).
         </p>
       </div>
-      <section id="slider-container">
-        <h2>Year</h2>
-        <Slider year={year} setYear={setYear} />
-      </section>
+
+      <h2>Year</h2>
+      <Slider year={year} setYear={setYear} />
+
       <section>
         <Map
           countries={countryData.filter((c) => c.year == year)}
@@ -83,9 +83,7 @@ function App() {
           selectedCountries={selectedCountries}
         />
       </section>
-      <section>
-        <Legends />
-      </section>
+      <Legends />
       <section id="scatterplot-buttons">
         <button
           onClick={() => setAmountOfScatterplots(amountOfScatterplots + 1)}
@@ -112,25 +110,21 @@ function App() {
         ))}
       </section>
 
-      {amountOfScatterplots > 6 && (
-        <section>
-          <Legends />
-        </section>
-      )}
-      <section id="table-container">
-        <CountryTable countries={selectedCountries} data={countryData} />
-      </section>
-      <section>
-        <ScatterPlotContainer
-          data={countryData}
-          size="large"
-          hoveredCountry={hoveredCountry}
-          selectedCountries={selectedCountries}
-          setHoveredCountry={setHoveredCountry}
-          setSelectedCountries={setSelectedCountries}
-        />
-      </section>
+      {amountOfScatterplots > 6 && <Legends />}
+
+      <CountryTable countries={selectedCountries} data={countryData} />
+
+      <ScatterPlotContainer
+        data={countryData}
+        size="large"
+        hoveredCountry={hoveredCountry}
+        selectedCountries={selectedCountries}
+        setHoveredCountry={setHoveredCountry}
+        setSelectedCountries={setSelectedCountries}
+      />
+
       <Legends />
+
       <footer>
         <p>
           Data from{' '}

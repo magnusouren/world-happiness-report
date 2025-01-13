@@ -23,6 +23,7 @@ header {
 }
 
 footer {
+  width: 100%;
   margin-top: 5rem;
   font-weight: 300;
   text-align: center;
@@ -52,6 +53,11 @@ button:hover {
   color: white;
 }
 
+h2 {
+  width: 100%;
+  text-align: left;
+}
+
 #scatterplots {
   display: flex;
   flex-direction: row;
@@ -66,24 +72,6 @@ button:hover {
   font-size: smaller;
   padding: 1rem 20%;
   text-overflow: ellipsis;
-}
-
-#slider-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-#slider-container > h2 {
-  width: 100%;
-  text-align: left;
-  margin-bottom: 2rem;
-}
-
-#table-container {
-  margin-top: 4rem;
-  margin-bottom: 4rem;
 }
 
 #scatterplot-buttons {

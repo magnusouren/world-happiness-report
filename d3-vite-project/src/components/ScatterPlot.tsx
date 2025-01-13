@@ -12,7 +12,7 @@ interface ScatterPlotProps {
   showRegressionLine?: boolean;
   size?: 'small' | 'medium' | 'large';
   selectedCountries: SelectedCountry[];
-  setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
+  setHoveredCountry: React.Dispatch<React.SetStateAction<string>>;
   setSelectedCountries: React.Dispatch<React.SetStateAction<SelectedCountry[]>>;
 }
 
@@ -193,7 +193,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
         d3.select(event.currentTarget)
           .attr('fill', getPlotColor(d.continent))
           .attr('r', getPointSize());
-        setHoveredCountry(null);
+        setHoveredCountry('');
         svg.select('#tooltip').remove();
       });
 
@@ -261,7 +261,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
       .attr('stroke-dasharray', '4,4');
 
     svg.on('mouseout', () => {
-      setHoveredCountry(null);
+      setHoveredCountry('');
       svg.select('#tooltip').remove();
     });
   }, [

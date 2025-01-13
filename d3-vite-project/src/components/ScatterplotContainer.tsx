@@ -7,9 +7,9 @@ import { Country, SelectedCountry } from '../types';
 interface ScatterPlotContainerProps {
   data: Country[];
   size?: 'small' | 'medium' | 'large';
-  hoveredCountry: string | null;
+  hoveredCountry: string;
   selectedCountries: SelectedCountry[];
-  setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
+  setHoveredCountry: React.Dispatch<React.SetStateAction<string>>;
   setSelectedCountries: React.Dispatch<React.SetStateAction<SelectedCountry[]>>;
 }
 
@@ -28,7 +28,7 @@ export const ScatterPlotContainer: React.FC<ScatterPlotContainerProps> = ({
   const [linearRegression, setLinearRegression] = useState<boolean>(false);
 
   useEffect(() => {
-    setHoveredCountry(null);
+    setHoveredCountry('');
   }, [xColumn, yColumn, year, continent, setHoveredCountry]);
 
   return (

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css';
 import { Map } from './components/Map';
-import geoJsonData from './data/custom.geo.json'; // GeoJSON-fil
 
 import data from './data/data.json';
 import { Slider } from './components/Slider';
@@ -16,18 +15,15 @@ function App() {
   const [selectedCountries, setSelectedCountries] = useState<SelectedCountry[]>(
     []
   );
-  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const [hoveredCountry, setHoveredCountry] = useState<
+    Country['countryName'] | ''
+  >('');
   const [year, setYear] = useState<number>(2023);
   const countryData = data as unknown as Country[];
 
   // Local values
-  const [geoJson, setGeoJson] = useState<unknown>(null);
   const [zoom, setZoom] = useState<number>(90);
   const [amountOfScatterplots, setAmountOfScatterplots] = useState(3);
-
-  useEffect(() => {
-    setGeoJson(geoJsonData);
-  }, []);
 
   return (
     <main style={{ zoom: `${zoom}%` }}>
@@ -70,19 +66,13 @@ function App() {
         <Slider year={year} setYear={setYear} />
       </section>
       <section>
-        {geoJson ? (
-          <Map
-            countries={countryData.filter((c) => c.year == year)}
-            geoJsonData={geoJson}
-            selectedCountries={selectedCountries}
-            setSelectedCountries={setSelectedCountries}
-            hoveredCountry={hoveredCountry}
-            setHoveredCountry={setHoveredCountry}
-          />
-        ) : (
-          <p>Laster kart...</p>
-        )}
-
+        <Map
+          countries={countryData.filter((c) => c.year == year)}
+          selectedCountries={selectedCountries}
+          setSelectedCountries={setSelectedCountries}
+          hoveredCountry={hoveredCountry}
+          setHoveredCountry={setHoveredCountry}
+        />
         <ScatterPlot
           data={countryData.filter((c) => c.year == year)}
           hoveredCountry={hoveredCountry}

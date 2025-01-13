@@ -1,64 +1,53 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+
+import geoJsonData from '../data/custom.geo.json'; // GeoJSON-fil
 import { geoPath, geoMercator } from 'd3-geo';
 
-import './Map.css';
 import { getPlotColor } from '../utils';
 import { Country, SelectedCountry } from '../types';
 
+import './Map.css';
+
 interface MapProps {
-  hoveredCountry: string | null;
+  hoveredCountry: string;
   countries: Country[];
-  geoJsonData: any; // GeoJSON data for countries
   selectedCountries: SelectedCountry[];
-  setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
+  setHoveredCountry: React.Dispatch<React.SetStateAction<string>>;
   setSelectedCountries: React.Dispatch<React.SetStateAction<SelectedCountry[]>>;
 }
 
 export const Map: React.FC<MapProps> = ({
   countries,
   hoveredCountry,
-  geoJsonData,
   setHoveredCountry,
   setSelectedCountries,
 }) => {
+  const geoJson: any = geoJsonData;
   const svgRef = useRef<SVGSVGElement>(null);
 
   const width = 630;
   const height = 600;
 
   useEffect(() => {
-    if (!geoJsonData || !countries) return;
-
     const svg = d3.select(svgRef.current);
 
-    const projection = geoMercator().fitSize([width, height], geoJsonData);
+    const projection = geoMercator().fitSize([width, height], geoJson);
     const pathGenerator = geoPath().projection(projection);
 
-    // Define a power scale to preprocess the lifeLadder values
-    // You can adjust the exponent to control the non-linearity
-    const powerScale = d3
-      .scalePow()
-      .exponent(1) // Change this value to tweak the non-linear transformation
-      .domain([1, 8]) // Input range
-      .range([0, 1]); // Output range for colorScale
-
-    // Create the color scale (still linear in this step)
+    const powerScale = d3.scalePow().exponent(1).domain([1, 8]).range([0, 1]);
     const colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([0, 1]);
 
     // Function to get color, applying the power scale first
-    const getColor = (value: number) => {
-      const transformedValue = powerScale(value); // Apply the non-linear transformation
-      return colorScale(transformedValue); // Map the transformed value to a color
-    };
+    const getColor = (value: number) => colorScale(powerScale(value));
 
     svg
       .selectAll('path')
       .data(geoJsonData.features)
       .join('path')
       .attr('d', (d: any) => pathGenerator(d) ?? '')
-      .attr('fill', (d: any) => {
+      .attr('fill', (d) => {
         if (d.properties.name === hoveredCountry)
           return getPlotColor('Hovered');
         const countryData = countries.find(
@@ -70,20 +59,20 @@ export const Map: React.FC<MapProps> = ({
       .attr('stroke', '#333')
       .attr('stroke-width', 0.6)
       .attr('cursor', 'pointer')
-      .on('mouseover', (event, d: any) => {
+      .on('mouseover', (event, d) => {
         d3.select(event.currentTarget).attr('fill', getPlotColor('Hovered'));
         setHoveredCountry(d.properties.name);
       })
       .on('mouseout', (event) => {
         d3.select(event.currentTarget).attr('fill', (d: any) => {
-          setHoveredCountry(null);
+          setHoveredCountry('');
           const countryData = countries.find(
             (c) => c.countryName === d.properties.name
           );
           return countryData ? getColor(countryData.lifeLadder) : '#ccc';
         });
       })
-      .on('click', (event, d: any) => {
+      .on('click', (event, d) => {
         const countryData = countries.find(
           (c) => c.countryName === d.properties.name
         );
@@ -116,7 +105,7 @@ export const Map: React.FC<MapProps> = ({
         }
       })
       .append('title')
-      .text((d: any) => {
+      .text((d) => {
         const countryData: Country | undefined = countries.find(
           (c) => c.countryName === d.properties.name
         );
@@ -133,7 +122,7 @@ export const Map: React.FC<MapProps> = ({
     const gradientScale = d3
       .scaleLinear()
       .domain([0, gradientWidth])
-      .range([0, 10]); // Matcher verdiene til lifeLadder
+      .range([0, 10]);
 
     const gradientData = d3.range(gradientWidth);
 
@@ -147,7 +136,6 @@ export const Map: React.FC<MapProps> = ({
       .attr('height', gradientHeight)
       .attr('fill', (d) => getColor(gradientScale(d)));
 
-    // Legg til tekst for verdier
     gradientSvg
       .selectAll('text')
       .data([0, 5, 10])
@@ -167,7 +155,7 @@ export const Map: React.FC<MapProps> = ({
       .attr('fill', 'black')
       .text((d) => (typeof d === 'number' ? d : d));
 
-    // Legg til tekst for "Life Ladder Score"
+    // Adding "Life Ladder Score" over the scale
     gradientSvg
       .append('text')
       .attr('x', 0)
@@ -178,7 +166,7 @@ export const Map: React.FC<MapProps> = ({
       .text('Life Ladder Score');
   }, [
     countries,
-    geoJsonData,
+    geoJson,
     hoveredCountry,
     setHoveredCountry,
     setSelectedCountries,
@@ -186,7 +174,7 @@ export const Map: React.FC<MapProps> = ({
 
   return (
     <div id="map-container">
-      <svg ref={svgRef} width={width} height={height}></svg>
+      <svg ref={svgRef} width={width} height={height} />
     </div>
   );
 };

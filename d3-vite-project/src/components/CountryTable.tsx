@@ -14,6 +14,7 @@ export const CountryTable: React.FC<CountryTableProps> = ({
 }) => {
   const [showDetails, setShowDetails] = useState(true);
 
+  // Coloumn values and amount of decimals
   const numericalColumns: [keyof Country, number][] = [
     ['lifeLadder', 2],
     ['gpdPerCapita', 2],
@@ -75,14 +76,7 @@ export const CountryTable: React.FC<CountryTableProps> = ({
                 <td>{d.continent}</td>
 
                 {numericalColumns.map(([key, decimals]) => (
-                  <td
-                    key={key}
-                    // style={{
-                    //   backgroundColor: colorValue(key, d[key] as number),
-                    // }}
-                  >
-                    {(d[key] as number).toFixed(decimals)}
-                  </td>
+                  <td key={key}>{(d[key] as number).toFixed(decimals)}</td>
                 ))}
               </tr>
             ))}

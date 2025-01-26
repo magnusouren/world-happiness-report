@@ -1,9 +1,9 @@
 import pandas as pd
-from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 # Load dataset
-data_path = 'data.csv'
+data_path = 'data_new_titles.csv'
 happiness_data = pd.read_csv(data_path, encoding='ISO-8859-1')
 
 # Inspect dataset
@@ -13,23 +13,24 @@ print("Initial Data Overview:\n", happiness_data.head())
 # Handle missing values only for numeric columns
 numeric_columns = happiness_data.select_dtypes(include='number').columns
 happiness_data[numeric_columns] = happiness_data[numeric_columns].fillna(
-    happiness_data[numeric_columns].mean())
-
+    happiness_data[numeric_columns].mean()
+)
 print("Missing values handled for numeric columns.")
 
 # Print year intervals for each country
 year_intervals = happiness_data.groupby(
-    "Country name")["year"].agg(["min", "max"])
+    "countryName")["year"].agg(["min", "max"])
 
 # Sort by the smallest interval
 year_intervals = year_intervals.sort_values(by="min")
 
+# Continent mapping
 continent_map = {
     "Africa": ["Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", "Cape Verde", "Chad", "Comoros",
                "Congo (Brazzaville)", "Congo (Kinshasa)", "Djibouti", "Egypt", "Equatorial Guinea", "Eswatini", "Ethiopia",
                "Gabon", "Gambia", "Ghana", "Guinea", "Ivory Coast", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar",
                "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria",
-               "Rwanda", "Senegal", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo",
+               "Rwanda", "Senegal", "Sierra Leone", "Somalia", "Somaliland region", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo",
                "Tunisia", "Uganda", "Zambia", "Zimbabwe"],
     "Asia": ["Afghanistan", "Armenia", "Azerbaijan", "Bahrain", "Bangladesh", "Bhutan", "Brunei", "Cambodia", "China", "Cyprus",
              "Georgia", "Hong Kong S.A.R. of China", "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan",
@@ -50,8 +51,6 @@ continent_map = {
                 "Samoa", "Solomon Islands", "Tonga", "Tuvalu", "Vanuatu"]
 }
 
-# Function to map country to continent
-
 
 def map_continent(country):
     for continent, countries in continent_map.items():
@@ -61,62 +60,56 @@ def map_continent(country):
 
 
 # Apply continent mapping
-happiness_data["continent"] = happiness_data["Country name"].apply(
+happiness_data["continent"] = happiness_data["countryName"].apply(
     map_continent)
 
-# Normalize data for PCA
+print("Continent mapping applied.")
+
+# Normalize data with Z-score
 columns_to_normalize = [
-    "Log GDP per capita",
-    "Social support",
-    "Healthy life expectancy at birth",
-    "Freedom to make life choices",
-    "Generosity",
-    "Perceptions of corruption"
+    "gpdPerCapita",
+    "socialSupport",
+    "healthyLifeExpectancyAtBirth",
+    "freedomToMakeLifeChoices",
+    "generosity",
+    "corruption"
 ]
+
 scaler = StandardScaler()
-normalized_values = scaler.fit_transform(happiness_data[columns_to_normalize])
-normalized_df = pd.DataFrame(normalized_values, columns=[f"{col.replace(' ', '').replace('Log', 'log').replace('Healthy', 'healthy').replace('Freedom', 'freedom').replace('Social', 'social').replace('Choices', 'choices').replace('Life', 'life').replace('GDP', 'gdp').replace(
-    'Generosity', 'generosity').replace('Perceptions', 'perceptions').replace('Corruption', 'corruption').replace('AtBirth', 'atBirth').replace('ToMake', 'toMake').replace('LifeExpectancy', 'lifeExpectancy').lower()}Normalized" for col in columns_to_normalize])
+z_normalized_values = scaler.fit_transform(
+    happiness_data[columns_to_normalize])
+
+# Add normalized columns to the dataset
+normalized_df = pd.DataFrame(z_normalized_values, columns=[
+                             f"{col}_z" for col in columns_to_normalize])
 happiness_data = pd.concat([happiness_data, normalized_df], axis=1)
 
-# Rename all columns to camelCase
-happiness_data.columns = [
-    ''.join(word.title() if i > 0 else word for i, word in enumerate(
-        col.replace(' ', '_').lower().split('_')))
-    for col in happiness_data.columns
-]
+print("Data normalized with Z-score.")
 
-# Apply PCA
+# PCA on the normalized data
 pca = PCA(n_components=2)
-pca_result = pca.fit_transform(normalized_values)
+
+# Define the columns for PCA
+columns_for_pca = [
+    "gpdPerCapita_z",
+    "socialSupport_z",
+    "healthyLifeExpectancyAtBirth_z",
+    "freedomToMakeLifeChoices_z",
+    "generosity_z",
+    "corruption_z",
+    "positiveAffect",
+    "negativeAffect"
+]
+# Apply PCA
+pca_result = pca.fit_transform(happiness_data[columns_for_pca])
+
+# Add PCA results to the dataset
 happiness_data['pca1'] = pca_result[:, 0]
 happiness_data['pca2'] = pca_result[:, 1]
-print("PCA completed. Explained variance:", pca.explained_variance_ratio_)
 
-# Prepare data for visualizations
-average_happiness = happiness_data.groupby(
-    'year')["lifeLadder"].mean().reset_index()
-average_happiness.rename(
-    columns={"lifeLadder": "averageHappiness"}, inplace=True)
-
-# Write to a CSV file
-year_intervals.to_csv("year_intervals.csv")
-
-# Filter rows based on the largest minimum year across countries
-max_min_year = 2013
-happiness_data = happiness_data[happiness_data["year"] >= max_min_year]
-print(f"Filtered data to include only years >= {max_min_year}.")
+print("PCA applied on the normalized data.")
 
 # Save cleaned and prepared data
-prepared_data_path = 'happiness_data_prepared.csv'
+prepared_data_path = 'preprocessed_data.csv'
 happiness_data.to_csv(prepared_data_path, index=False)
-print(f"Prepared data saved to {prepared_data_path}")
-
-# Load your prepared dataset
-data = pd.read_csv("happiness_data_prepared.csv")
-# Save as JSON
-data.to_json("data.json", orient="records")
-print("Data saved as JSON.")
-
-# Script completed
-print("Data preparation complete.")
+print(f"Prepared data with normalized values saved to {prepared_data_path}")

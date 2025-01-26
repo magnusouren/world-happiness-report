@@ -22,4 +22,4 @@ def csv_to_json(csv_file_path, json_file_path):
         json.dump(data, json_file, indent=4)
 
 
-csv_to_json('./new_data.csv', './data.json')
+csv_to_json('./preprocessed_data.csv', './data.json')

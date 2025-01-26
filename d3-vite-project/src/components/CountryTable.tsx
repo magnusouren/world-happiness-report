@@ -29,7 +29,7 @@ export const CountryTable: React.FC<CountryTableProps> = ({
 
   if (countries.length === 0) {
     return (
-      <div>
+      <div className="country-container">
         <h2>Selected Countries</h2>
         <p>
           No country selected, click on a country from a scatterplot or the map
@@ -40,7 +40,7 @@ export const CountryTable: React.FC<CountryTableProps> = ({
   }
 
   return (
-    <div>
+    <div className="country-container">
       <h2>Selected Countries</h2>
       <p>
         Table showing the data for the selected countries for the selected year.

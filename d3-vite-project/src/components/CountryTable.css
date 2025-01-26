@@ -8,6 +8,10 @@ table {
   width: 100%;
 }
 
+.country-container {
+  width: 100%;
+}
+
 th,
 td {
   border: 1px solid #000000;

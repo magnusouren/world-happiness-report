@@ -72,7 +72,9 @@ columns_to_normalize = [
     "healthyLifeExpectancyAtBirth",
     "freedomToMakeLifeChoices",
     "generosity",
-    "corruption"
+    "corruption",
+    "positiveAffect",
+    "negativeAffect"
 ]
 
 scaler = StandardScaler()
@@ -97,8 +99,8 @@ columns_for_pca = [
     "freedomToMakeLifeChoices_z",
     "generosity_z",
     "corruption_z",
-    "positiveAffect",
-    "negativeAffect"
+    "positiveAffect_z",
+    "negativeAffect_z"
 ]
 # Apply PCA
 pca_result = pca.fit_transform(happiness_data[columns_for_pca])

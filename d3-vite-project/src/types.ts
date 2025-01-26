@@ -17,6 +17,8 @@ export interface Country {
   freedomToMakeLifeChoices_z: number;
   generosity_z: number;
   corruption_z: number;
+  positiveAffect_z: number;
+  negativeAffect_z: number;
   pca1: number;
   pca2: number;
 }

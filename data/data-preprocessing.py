@@ -65,6 +65,18 @@ happiness_data["continent"] = happiness_data["countryName"].apply(
 
 print("Continent mapping applied.")
 
+# Calculate correlation with lifeLadder
+correlations = happiness_data.corr(numeric_only=True)
+
+# Display sorted correlations
+print("Correlation of features with lifeLadder:\n", correlations)
+
+# Optionally, save the matrix to a CSV file for further analysis
+correlation_matrix_path = 'correlation_matrix.csv'
+correlations.to_csv(correlation_matrix_path)
+print(f"Full correlation matrix saved to {correlation_matrix_path}")
+
+
 # Normalize data with Z-score
 columns_to_normalize = [
     "gpdPerCapita",
